@@ -5,11 +5,11 @@ include "root" {
 }
 
 terraform {
-  source = "github.com/terraform-aws-modules/terraform-aws-vpc?ref=v3.19.0"
+  source = "github.com/terraform-aws-modules/terraform-aws-vpc//.?ref=v3.19.0"
 }
 
 dependency "datasources" {
-  config_path = "../../../datasources"
+  config_path = "../../../datasources/"
 }
 
 locals {

@@ -50,7 +50,9 @@ inputs = {
     name = "${basename(get_terragrunt_dir())}-ds"
   }
 
-  cluster-name = dependency.eks.outputs.cluster_id
+# cluster-name = dependency.eks.outputs.cluster_id
+# TODO remove hardcoding
+  cluster-name = "igor-teks-production-demo"
 
   tags = merge(
     include.root.locals.custom_tags
@@ -85,7 +87,7 @@ inputs = {
   # For this to work:
   # * GITHUB_TOKEN should be set
   flux2 = {
-    enabled               = true
+    enabled               = false
     target_path           = "gitops/clusters/${include.root.locals.merged.env}/${include.root.locals.merged.name}"
     github_url            = "ssh://git@github.com/particuleio/teks"
     repository            = "teks"

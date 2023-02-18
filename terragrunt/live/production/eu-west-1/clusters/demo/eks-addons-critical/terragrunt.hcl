@@ -48,7 +48,9 @@ inputs = {
     values = "100000"
   }
 
-  cluster-name = dependency.eks.outputs.cluster_id
+  #cluster-name = dependency.eks.outputs.cluster_id
+  # TODO remove hardcoding
+  cluster-name = "igor-teks-production-demo"
 
   tags = merge(
     include.root.locals.custom_tags

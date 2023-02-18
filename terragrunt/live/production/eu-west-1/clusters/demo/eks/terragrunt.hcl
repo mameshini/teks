@@ -23,7 +23,7 @@ locals {
 }
 
 terraform {
-  source = "github.com/terraform-aws-modules/terraform-aws-eks?ref=v19.7.0"
+  source = "github.com/terraform-aws-modules/terraform-aws-eks//.?ref=v19.7.0"
 
   after_hook "kubeconfig" {
     commands = ["apply"]
@@ -74,12 +74,6 @@ inputs = {
   cluster_enabled_log_types       = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
-  cluster_encryption_config = [
-    {
-      provider_key_arn = dependency.encryption_config.outputs.arn
-      resources        = ["secrets"]
-    }
-  ]
   cluster_addons = {
     coredns = {
       addon_version     = "v1.8.7-eksbuild.3"
@@ -100,7 +94,7 @@ inputs = {
 
   enable_irsa = true
 
-  cloudwatch_log_group_retention_in_days = 365
+  cloudwatch_log_group_retention_in_days = 7
 
   node_security_group_additional_rules = {
     ingress_self_all = {
@@ -179,11 +173,10 @@ inputs = {
     tags                         = local.mng_tags
     desired_size                 = 1
     min_size                     = 1
-    max_size                     = 100
-    capacity_type                = "ON_DEMAND"
+    max_size                     = 20
+    capacity_type                = "SPOT"
     platform                     = "bottlerocket"
     ami_release_version          = "1.9.2-b8074d44"
-    iam_role_additional_policies = ["arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"]
     ebs_optimized                = true
     update_config = {
       max_unavailable_percentage = 33
@@ -240,57 +233,5 @@ inputs = {
       }
     }
 
-    "default-c" = {
-      ami_type                   = "BOTTLEROCKET_x86_64"
-      platform                   = "bottlerocket"
-      instance_types             = ["t3a.large"]
-      subnet_ids                 = [dependency.vpc.outputs.private_subnets[2]]
-      enable_bootstrap_user_data = true
-      bootstrap_extra_args       = <<-EOT
-        "max-pods" = ${run_cmd("/bin/sh", "-c", "../../../../../../../tools/max-pods-calculator.sh --instance-type t3a.large --cni-version 1.11.2 --cni-prefix-delegation-enabled")}
-        EOT
-      labels = {
-        network = "private"
-      }
-    }
-
-    "arm-a" = {
-      ami_type                   = "BOTTLEROCKET_ARM_64"
-      instance_types             = ["t4g.medium"]
-      subnet_ids                 = [dependency.vpc.outputs.private_subnets[0]]
-      enable_bootstrap_user_data = true
-      bootstrap_extra_args       = <<-EOT
-        "max-pods" = ${run_cmd("/bin/sh", "-c", "../../../../../../../tools/max-pods-calculator.sh --instance-type t4g.medium --cni-version 1.11.2 --cni-prefix-delegation-enabled")}
-        EOT
-      labels = {
-        network = "private"
-      }
-    }
-
-    "arm-b" = {
-      ami_type                   = "BOTTLEROCKET_ARM_64"
-      instance_types             = ["t4g.medium"]
-      subnet_ids                 = [dependency.vpc.outputs.private_subnets[1]]
-      enable_bootstrap_user_data = true
-      bootstrap_extra_args       = <<-EOT
-        "max-pods" = ${run_cmd("/bin/sh", "-c", "../../../../../../../tools/max-pods-calculator.sh --instance-type t4g.medium --cni-version 1.11.2 --cni-prefix-delegation-enabled")}
-        EOT
-      labels = {
-        network = "private"
-      }
-    }
-
-    "arm-c" = {
-      ami_type                   = "BOTTLEROCKET_ARM_64"
-      instance_types             = ["t4g.medium"]
-      subnet_ids                 = [dependency.vpc.outputs.private_subnets[2]]
-      enable_bootstrap_user_data = true
-      bootstrap_extra_args       = <<-EOT
-        "max-pods" = ${run_cmd("/bin/sh", "-c", "../../../../../../../tools/max-pods-calculator.sh --instance-type t4g.medium --cni-version 1.11.2 --cni-prefix-delegation-enabled")}
-        EOT
-      labels = {
-        network = "private"
-      }
-    }
   }
 }
